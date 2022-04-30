@@ -8,4 +8,4 @@ Tests show that best results:
 - Number of neighbors: 8
 - Threshold distance: 2*std
 
-![Bunny filtered](/images/filtered_bunny.png)
+![Bunny filtered](./images/filtered_bunny.png)
