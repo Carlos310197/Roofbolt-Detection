@@ -15,7 +15,7 @@
 #include <valarray>
 #include <unordered_set>
 
-#define NUM_NEIGHBORS 10
+#define NUM_NEIGHBORS 6
 
 void remove(std::vector<int> &v)
 {
@@ -40,7 +40,7 @@ int main()
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filt_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
 	// Read point cloud data
-	if (pcl::io::loadPCDFile<pcl::PointXYZ>("../../dataset/bunny_cloud.pcd", *cloud) == -1) //* load the file
+	if (pcl::io::loadPCDFile<pcl::PointXYZ>("../../dataset/scan_map2.pcd", *cloud) == -1) //* load the file
 	{
 		PCL_ERROR("Couldn't read file test_pcd.pcd \n");
 		return (-1);
@@ -48,15 +48,15 @@ int main()
 	std::cout << "Loaded " << cloud->width * cloud->height << " points" << std::endl;
 
 	// Lets introduce noise onto the point cloud
-	srand((unsigned)time(NULL));
-	int num_points = cloud->size();
-	for(int i=0; i<num_points/10000; i++)
-	{
-		int idx = (rand() % num_points) + 1;
-		cloud->points[idx].x += 0.02 * (float)rand() / RAND_MAX;
-		cloud->points[idx].y += 0.02 * (float)rand() / RAND_MAX;
-		cloud->points[idx].z += 0.02 * (float)rand() / RAND_MAX;
-	}
+	// srand((unsigned)time(NULL));
+	// int num_points = cloud->size();
+	// for(int i=0; i<num_points/10000; i++)
+	// {
+	// 	int idx = (rand() % num_points) + 1;
+	// 	cloud->points[idx].x += 0.02 * (float)rand() / RAND_MAX;
+	// 	cloud->points[idx].y += 0.02 * (float)rand() / RAND_MAX;
+	// 	cloud->points[idx].z += 0.02 * (float)rand() / RAND_MAX;
+	// }
 
 	// Create kdtree object
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -129,7 +129,7 @@ int main()
 			if (inliers->indices.size() == 0)
 			{
 				cont_failed++;
-				std::cout << "Fail!" << std::endl;
+				// std::cout << "Fail!" << std::endl;
 				continue;
 			}
 		}
@@ -143,7 +143,7 @@ int main()
 	auto end = std::chrono::steady_clock::now();
 
 	// Number of points that failed to fit a plane
-	std::cout << "Number of points that fail to fit a plane: " << cont_failed << std::endl;
+	std::cout << "Number of points that failed to fit a plane: " << cont_failed << std::endl;
 	std::cout << "Failed Percentage: " << (float)cont_failed * 100.0 / (cloud->points.size()) << "%" << std::endl;
 
 	// Display measured time
