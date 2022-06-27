@@ -33,31 +33,8 @@ void remove(std::vector<int> &v)
 	v.erase(itr, v.end());
 }
 
-int main()
+void KNN_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr filt_cloud_colored, pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud)
 {
-	// Create pointer to point cloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filt_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-
-	// Read point cloud data
-	if (pcl::io::loadPCDFile<pcl::PointXYZ>("../../dataset/scan_map2.pcd", *cloud) == -1) //* load the file
-	{
-		PCL_ERROR("Couldn't read file test_pcd.pcd \n");
-		return (-1);
-	}
-	std::cout << "Loaded " << cloud->width * cloud->height << " points" << std::endl;
-
-	// Lets introduce noise onto the point cloud
-	// srand((unsigned)time(NULL));
-	// int num_points = cloud->size();
-	// for(int i=0; i<num_points/10000; i++)
-	// {
-	// 	int idx = (rand() % num_points) + 1;
-	// 	cloud->points[idx].x += 0.02 * (float)rand() / RAND_MAX;
-	// 	cloud->points[idx].y += 0.02 * (float)rand() / RAND_MAX;
-	// 	cloud->points[idx].z += 0.02 * (float)rand() / RAND_MAX;
-	// }
-
 	// Create kdtree object
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
 	kdtree.setInputCloud(cloud);
@@ -134,6 +111,7 @@ int main()
 			}
 		}
 	}
+
 	// Remove duplicates from the inliers_idx vector
 	remove(inliers_idx);
 	std::cout << "Number of inliers: " << inliers_idx.size() << std::endl;
@@ -152,20 +130,62 @@ int main()
 		 << " ms" << endl;
 
 	// Copy the original to the filtered cloud
-	pcl::copyPointCloud(*cloud, *filt_cloud);
-	for (int i = 0; i < filt_cloud->points.size(); i++)
+	pcl::copyPointCloud(*cloud, *filt_cloud_colored);
+	for (int i = 0; i < filt_cloud_colored->points.size(); i++)
 	{
-		filt_cloud->points[i].r = 255;
-		filt_cloud->points[i].g = 0;
-		filt_cloud->points[i].b = 0;
+		filt_cloud_colored->points[i].r = 255;
+		filt_cloud_colored->points[i].g = 0;
+		filt_cloud_colored->points[i].b = 0;
 	}
 	for (int i = 0; i < inliers_idx.size(); i++)
 	{
-		// add the color
-		filt_cloud->points[inliers_idx[i]].r = 255;
-		filt_cloud->points[inliers_idx[i]].g = 255;
-		filt_cloud->points[inliers_idx[i]].b = 255;
+		// add the color to filt_cloud_colored
+		filt_cloud_colored->points[inliers_idx[i]].r = 255;
+		filt_cloud_colored->points[inliers_idx[i]].g = 255;
+		filt_cloud_colored->points[inliers_idx[i]].b = 255;
+
+		// keep filtered points in filt_cloud
+		filt_cloud->points[i] = cloud->points[inliers_idx[i]];
 	}
+}
+
+void Connected_component(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud)
+{
+
+}
+
+int main()
+{
+	// Create pointer to point cloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr filt_cloud_colored(new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud_cc(new pcl::PointCloud<pcl::PointXYZ>);
+
+	// Read point cloud data
+	if (pcl::io::loadPCDFile<pcl::PointXYZ>("../../dataset/scan_map2.pcd", *cloud) == -1) //* load the file
+	{
+		PCL_ERROR("Couldn't read file test_pcd.pcd \n");
+		return (-1);
+	}
+	std::cout << "Loaded " << cloud->width * cloud->height << " points" << std::endl;
+
+	// Lets introduce noise onto the point cloud
+	// srand((unsigned)time(NULL));
+	// int num_points = cloud->size();
+	// for(int i=0; i<num_points/10000; i++)
+	// {
+	// 	int idx = (rand() % num_points) + 1;
+	// 	cloud->points[idx].x += 0.02 * (float)rand() / RAND_MAX;
+	// 	cloud->points[idx].y += 0.02 * (float)rand() / RAND_MAX;
+	// 	cloud->points[idx].z += 0.02 * (float)rand() / RAND_MAX;
+	// }
+
+	// KNN filter
+	KNN_filter(cloud, filt_cloud_colored, filt_cloud);
+
+	// Connected component filter
+	Connected_component(filt_cloud, filt_cloud_cc);
 
 	//---------------------------------------------
 	//-------------Display Cloud VTK---------------
@@ -173,7 +193,7 @@ int main()
 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("Test Viewer"));
 	viewer->setBackgroundColor(0, 0, 0);
 	viewer->initCameraParameters();
-	viewer->setCameraPosition(0, 0.1, 0.1,    0, 0, 0,   0, 0, 1);
+	viewer->setCameraPosition(-0.1,-0.1, 0,   0, 0, 0,   0, 0, 1);
 	viewer->setCameraFieldOfView(0.523599);
 	viewer->setCameraClipDistances(0.00522511, 50); 
 

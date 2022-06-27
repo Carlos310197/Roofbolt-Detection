@@ -11,3 +11,5 @@ Tests show that best results:
 In the following image, the bunny point cloud has been corrupted with additive noise. Points colored with red have been
 identify as noisy points.
 ![Bunny filtered](./images/filtered_bunny.png)
+
+![Basement filtered](./images/real_scenario.png)

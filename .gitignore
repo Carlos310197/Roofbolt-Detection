@@ -1,4 +1,6 @@
 filtering/build/
 filtering/.vscode/
-dataset/scan*.pcd
-dataset/*.txt
+resample/build/
+resample/.vscode/
+dataset/
+.vscode/
