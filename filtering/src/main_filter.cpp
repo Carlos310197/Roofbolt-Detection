@@ -86,7 +86,7 @@ void KNN_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::
 				KNNpoints->points[i] = cloud->points[pointIdxKNNSearch[i]];
 
 			///// Fit a plane to the neighborhood
-			seg.setOptimizeCoefficients(true);// Optional
+			seg.setOptimizeCoefficients(false);// Optional
 			// Mandatory
 			seg.setModelType(pcl::SACMODEL_PLANE); // fit to a plane
 			seg.setMethodType(pcl::SAC_RANSAC);
@@ -131,12 +131,17 @@ void KNN_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::
 
 	// Copy the original to the filtered cloud
 	pcl::copyPointCloud(*cloud, *filt_cloud_colored);
+	filt_cloud->resize(cloud->points.size());
+
+	// Colour outliers with red
 	for (int i = 0; i < filt_cloud_colored->points.size(); i++)
 	{
 		filt_cloud_colored->points[i].r = 255;
 		filt_cloud_colored->points[i].g = 0;
 		filt_cloud_colored->points[i].b = 0;
 	}
+
+	// Colour inliers with white
 	for (int i = 0; i < inliers_idx.size(); i++)
 	{
 		// add the color to filt_cloud_colored
@@ -182,10 +187,12 @@ int main()
 	// }
 
 	// KNN filter
+	std::cout << "Starting KNN filter..." << std::endl << std::endl;
 	KNN_filter(cloud, filt_cloud_colored, filt_cloud);
+	std::cout << "\nKNN filtering done!" << std::endl;
 
 	// Connected component filter
-	Connected_component(filt_cloud, filt_cloud_cc);
+	// Connected_component(filt_cloud, filt_cloud_cc);
 
 	//---------------------------------------------
 	//-------------Display Cloud VTK---------------
@@ -201,9 +208,24 @@ int main()
 	viewer->removeAllShapes();
 	viewer->removeAllPointClouds();
 
+	// Create a viewport 1
+    int v1(0);
+    viewer->createViewPort (0.0, 0.0, 0.5, 1.0, v1);
+    viewer->setBackgroundColor (0, 0, 0, v1);
+    viewer->addText ("Unfiltered PointCloud", 10, 10, "v1 text", v1);
+    viewer->addPointCloud<pcl::PointXYZRGB> (filt_cloud_colored, "cloud1", v1);
+
+	// Create a viewport 2
+    int v2(0);
+    viewer->createViewPort (0.5, 0.0, 1.0, 1.0, v2);
+    viewer->setBackgroundColor (0.5, 0.5, 0.5, v2);
+    viewer->addText ("Filtered Point Cloud", 10, 10, "v2 text", v2);
+    viewer->addPointCloud<pcl::PointXYZ> (filt_cloud, "cloud2", v2);
+
 	// The point cloud
-	viewer->addPointCloud<pcl::PointXYZRGB>(filt_cloud, "cloud");
-	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
+	viewer->addPointCloud<pcl::PointXYZ>(filt_cloud, "cloud");
+	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "cloud1");
+	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "cloud2");
 
 	// viewer->resetCamera ();
 	while (!viewer->wasStopped())
