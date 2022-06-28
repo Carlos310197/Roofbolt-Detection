@@ -6,6 +6,8 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/organized_connected_component_segmentation.h>
+#include <pcl/segmentation/comparator.h>
 
 #include <iostream>
 #include <vector>
@@ -154,10 +156,15 @@ void KNN_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::
 	}
 }
 
-void Connected_component(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud)
-{
-
-}
+// void Connected_component(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filt_cloud)
+// {
+// 	pcl::OrganizedConnectedComponentSegmentation<pcl::PointXYZ, pcl::PCLBase<pcl::PointXYZ>> connected_component(pcl::Comparator<pcl::PointXYZ>::Ptr comparator);
+// 	pcl::PointCloud<pcl::PCLBase<pcl::PointXYZ>> labels;
+// 	std::vector<pcl::PointIndices> label_indices;
+// 	connected_component.setInputCloud(cloud);
+// 	connected_component.segment(labels, label_indices);
+// 	std::cout << labels << std::endl;
+// }
 
 int main()
 {

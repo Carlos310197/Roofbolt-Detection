@@ -4,12 +4,29 @@
 #include <pcl/surface/mls.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <chrono>
+
 int main()
 {
     // Load input file into a PointCloud<T> with an appropriate type
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     // Load bun0.pcd -- should be available with the PCL archive in test
-    pcl::io::loadPCDFile("../../dataset/scan_map2.pcd", *cloud);
+    pcl::io::loadPCDFile("../../dataset/bunny_cloud_downsamp.pcd", *cloud);
+
+    // Lets introduce noise onto the point cloud
+	srand((unsigned)time(NULL));
+	int num_points = cloud->size();
+	for(int i=0; i<num_points/2; i++)
+	{
+		int idx = (rand() % num_points) + 1;
+		cloud->points[idx].x += 0.01 * (float)rand() / RAND_MAX;
+		cloud->points[idx].y += 0.01 * (float)rand() / RAND_MAX;
+		cloud->points[idx].z += 0.01 * (float)rand() / RAND_MAX;
+	}
 
     // Create a KD-Tree
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
@@ -24,7 +41,7 @@ int main()
 
     // Set parameters
     mls.setInputCloud(cloud);
-    mls.setPolynomialOrder(2);
+    mls.setPolynomialOrder(4);
     mls.setSearchMethod(tree);
     mls.setSearchRadius(0.03);
 
@@ -32,7 +49,7 @@ int main()
     mls.process(*mls_points);
 
     // Save output
-    pcl::io::savePCDFile("../../dataset/mls_scan_map2.pcd", *mls_points);
+    pcl::io::savePCDFile("../../dataset/mls_bunny_cloud.pcd", *mls_points);
 
     //---------------------------------------------
 	//-------------Display Cloud VTK---------------
