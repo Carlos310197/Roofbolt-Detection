@@ -1,6 +1,8 @@
 # Roofbolt Detection using LiDARs
 
-# KNN Filter
+# Point Cloud Pre-processing
+
+## 1. KNN Filter
 This algorithm computes the mean and standard deviation of each neighborhood's point. Based on this values and the
 computation of the plane that best fits each neighboorhood, points are kept or refused by a comparison with a threshold value.
 
@@ -14,7 +16,7 @@ identify as noisy points.
 
 ![Basement filtered](./images/real_scenario.png)
 
-# MLS Upsampling
+## 2. MLS Upsampling
 Some of the data irregularities (caused by small distance measurement errors) are very hard to remove using statistical analysis.
 To create complete models, glossy surfaces as well as occlusions in the data must be accounted for.
 In situations where additional scans are impossible to acquire, a solution is to use a resampling algorithm, which attempts to recreate the missing parts of the surface by higher order polynomial interpolations between the surrounding data points. By performing resampling, these small errors can be corrected and the “double walls” artifacts resulted from registering multiple scans together can be smoothed.
